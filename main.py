@@ -128,10 +128,13 @@ async def twitch(ctx, id: str):
 		url=f"https://www.twitch.tv/{id}"
 	)
 	action_row = manage_components.create_actionrow(button)
-	await ctx.send(
-		embed=embed,
-		components=[action_row]
-	)
+	if streamerType != "트수":
+		await ctx.send(
+			embed=embed,
+			components=[action_row]
+		)
+	else:
+		await ctx.send(embed=embed)
 
 @slash.slash(name="calendar",
 		description="달력 출력하기",
@@ -151,9 +154,9 @@ async def twitch(ctx, id: str):
 		]
 	)
 async def calendar(ctx, year: int = time.localtime(time.time()).tm_year, month: int = time.localtime(time.time()).tm_mon):
-	embed = discord.Embed(color=0xfffff, title=f"{year}년 {month}월 달력", description=f"{calendar.prmonth(year, month)}```")
-	embed.set_footer(text="봇 개발자: 이하님#9999", icon_url=owner_avator)
-	await ctx.send(embed=embed)
+    embed = discord.Embed(color=0xfffff, title=f"{year}년 {month}월 달력", description=f"{calendar.prmonth(year, month)}```")
+    embed.set_footer(text="봇 개발자: 이하님#9999", icon_url=owner_avator)
+    await ctx.send(embed=embed)
 
 @bot.event
 async def on_slash_command_error(ctx, ex):
