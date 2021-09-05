@@ -42,6 +42,7 @@ async def help(ctx):
 	embed = discord.Embed(color=0xffffff, title="이하봇 슬래시명령어 도움말")
 	embed.add_field(name="/twitch [ID]", value="[ID] = 트위치 유저 ID\n[ID]란에 작성한 유저에 대한 정보를 불러옵니다.", inline=False)
 	embed.add_field(name="/invite", value="이하봇 초대 링크를 가져옵니다.", inline=False)
+	await ctx.send(embed=embed)
 
 @slash.slash(name="invite", description="이하봇 초대 링크를 가져옵니다.")
 async def invite(ctx):
@@ -108,7 +109,7 @@ async def twitch(ctx, id: str):
 		gotoChannel = f"현재 방송을 진행중이지 않습니다. <:offline:883649829589352478>"
 	
 	# 임베드
-	embed = discord.Embed(color=0xfffff, title=f"{user.display_name} {badge} 님의 정보", description=gotoChannel)
+	embed = discord.Embed(color=0xfffff, title=f"{user.display_name} {badge}님의 정보", description=gotoChannel)
 	embed.add_field(name="트위치 등급", value=f"{streamerType}", inline=False)
 	if user.view_count > 1:
 		embed.add_field(name="누적 시청 수(채널 조회수)", value=format(user.view_count, ","), inline=False)
