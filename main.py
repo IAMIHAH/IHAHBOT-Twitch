@@ -21,6 +21,9 @@ from twitch.helix.models import Stream
 from discord_slash.utils import manage_components
 from discord_slash.model import ButtonStyle
 
+import time
+import calendar
+
 twclid = "0lfpvagxu5lpn2mscy5qf8mh05p9jp"
 twclsc = "8s3ztphf7fqeinwdsj6o1vlkh5gzle"
 helix = twitch.Helix(twclid, twclsc)
@@ -129,6 +132,28 @@ async def twitch(ctx, id: str):
 		embed=embed,
 		components=[action_row]
 	)
+
+@slash.slash(name="calendar",
+		description="달력 출력하기",
+		options=[
+			create_option(
+				name="year",
+				description="연도를 숫자 4자리로 입력해주세요. (ex: 2021)",
+				option_type=3,
+				required=False
+			),
+                        create_option(
+				name="month",
+				description="월을 숫자로 입력해주세요. (1~12)",
+				option_type=3,
+				required=False
+			)
+		]
+	)
+async def calendar(ctx, year: int = time.localtime(time.time()).tm_year, month: int = time.localtime(time.time()).tm_mon):
+	embed = discord.Embed(color=0xfffff, title=f"{year}년 {month}월 달력", description=f"{calendar.prmonth(year, month)}```")
+	embed.set_footer(text="봇 개발자: 이하님#9999", icon_url=owner_avator)
+	await ctx.send(embed=embed)
 
 @bot.event
 async def on_slash_command_error(ctx, ex):
