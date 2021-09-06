@@ -3,6 +3,7 @@ from zlib import decompress
 
 # dpy
 import discord
+from discord import player
 from discord.ext import commands
 from discord.gateway import DiscordWebSocket
 
@@ -21,6 +22,7 @@ from twitch.helix.models import Stream
 from discord_slash.utils import manage_components
 from discord_slash.model import ButtonStyle
 
+# 캘린더 근데 버그
 import time
 import calendar
 
@@ -29,7 +31,7 @@ twclsc = "8s3ztphf7fqeinwdsj6o1vlkh5gzle"
 helix = twitch.Helix(twclid, twclsc)
 
 token = "NzY5MTYzOTU1MTM3Njc1Mjc1.X5LBwQ.7KX_iIByxfwdFcyLH7_u_ptbpII"
-bot = commands.Bot(command_prefix="이하야 ")
+bot = commands.Bot(command_prefix=["이하야 ","ㅇ","d"])
 slash = SlashCommand(bot, sync_commands=True)
 owner_avator = "https://cdn.discordapp.com/avatars/741973166364164099/e2194f9f6d88a00123005bcfe4110acd.png"
 
@@ -37,16 +39,32 @@ owner_avator = "https://cdn.discordapp.com/avatars/741973166364164099/e2194f9f6d
 async def on_ready():
 	print("ready")
 
+@bot.remove_command('help')
+
 @slash.slash(name="help", description="도움말을 불러옵니다.")
+@bot.command(aliases=["도와줘", "도움",">"])
 async def help(ctx):
-	embed = discord.Embed(color=0xffffff, title="이하봇 슬래시명령어 도움말")
-	embed.add_field(name="/twitch [ID]", value="[ID] = 트위치 유저 ID\n[ID]란에 작성한 유저에 대한 정보를 불러옵니다.", inline=False)
+	embed = discord.Embed(color=0xffffff, title="이하봇 빗금 명령어 도움말")
+	embed.add_field(name="/twitch [ID]", value="\'이하야 트위치 [ID]\' 또는 \'ㅇㅌ [ID]\' 또는 \'dx [ID]\'로도 가능\n[ID] = 트위치 유저 ID\n[ID]란에 작성한 유저에 대한 정보를 불러옵니다.", inline=False)
 	embed.add_field(name="/invite", value="이하봇 초대 링크를 가져옵니다.", inline=False)
 	await ctx.send(embed=embed)
 
 @slash.slash(name="invite", description="이하봇 초대 링크를 가져옵니다.")
 async def invite(ctx):
 	embed = discord.Embed(color=0xffffff, title=f"초대하기", description="[바로가기](https://discord.com/oauth2/authorize?client_id=769163955137675275&permissions=8&scope=bot%20applications.commands)")
+	await ctx.send(embed=embed)
+
+@slash.slash(name="ping", description="이하봇 지연시간을 가져옵니다.")
+@bot.command(aliases=["vld","v","ㅍ"])
+async def ping(ctx):
+	t1 = time.perf_counter()
+	async with ctx.typing():
+		t2 = time.perf_counter()
+	msglatency = round((t2-t1)*1000)
+	latancy = bot.latency
+	embed = discord.Embed(color=0xabcdef, title=":ping_pong: 퐁!")
+	embed.add_field(name = ':ping_pong: 기본 지연시간', value = f'{round(latancy*1000)}ms', inline=False)
+	embed.add_field(name = ':trophy: 메시지 지연시간', value = f"{msglatency}ms", inline=False)
 	await ctx.send(embed=embed)
 
 @slash.slash(name="twitch",
@@ -60,6 +78,7 @@ async def invite(ctx):
 			)
 		]
 	)
+@bot.command(aliases=["ㅌ","트위치", "x", "t"])
 async def twitch(ctx, id: str):
 	user = helix.user(f'{id}')
 
@@ -67,7 +86,32 @@ async def twitch(ctx, id: str):
 	badge = ""
 	streamerType = ""
 	badgeInfo = ""
+	button = manage_components.create_button(
+		style=ButtonStyle.URL,
+		label=" 트위치 채널 바로가기",
+		url=f"https://www.twitch.tv/{id}"
+	)
+
 	# 스트리머 등급에 따른 표시 변경 및 이모지
+	if id == "dlgksla":
+		badge = f"{badge}<:IhahNew:860043368553381918> "
+		badgeInfo = f"{badgeInfo}<:IhahNew:860043368553381918> 봇 개발자\n"
+		# 나 전용임 히히
+		button = [
+			manage_components.create_button(
+				style=ButtonStyle.URL,
+				label="트위치 채널 바로가기",
+				#emoji="tv",
+				url=f"https://www.twitch.tv/{id}"
+			),
+			manage_components.create_button(
+				style=ButtonStyle.URL,
+				label="유튜브 채널 바로가기",
+				#emoji="tv",
+				url=f"https://www.youtube.com/channel/UCN_69Qvv0eHHKGGL7sdYsvg?sub_confirmation=1"
+			)
+		]
+
 	if f"{user.type}" == "admin":
 		streamerType = "트위치 어드민 <:admin:883691115398717450> / "
 		badge = f"{badge}<:admin:883691115398717450> "
@@ -99,7 +143,8 @@ async def twitch(ctx, id: str):
 
 	twbots = ["bbangddeock", "ssakdook", "nightbot", "commanderroot"]
 	if id.lower() in twbots:
-		badge = f"{badge} <:bot:883734868951961621>"
+		badge = f"{badge}<:bot:883734868951961621> "
+		badgeInfo = f"{badgeInfo}<:bot:883734868951961621> 봇"
 		streamerType = f"{streamerType} / 봇 <:bot:883734868951961621>"
 	
 	# 라이브 여부에 따른 이모지 표시
@@ -114,7 +159,8 @@ async def twitch(ctx, id: str):
 	if user.view_count > 1:
 		embed.add_field(name="누적 시청 수(채널 조회수)", value=format(user.view_count, ","), inline=False)
 	if user.is_live is True:
-		embed.add_field(name="현재 시청자 수", value=f"<:viewer:883687516979486761> {user.stream.viewer_count}")
+		embed.add_field(name="현재 시청자 수", value=f"<:viewer:883687516979486761> {user.stream.viewer_count}", inline=False)
+		embed.add_field(name="방송 제목", value=f"{user.stream.title}", inline=False)
 	if user.description != "":
 		embed.add_field(name="사용자 소개", value=f"{user.description}", inline=False)
 	else:
@@ -122,13 +168,10 @@ async def twitch(ctx, id: str):
 	embed.add_field(name="보유한 뱃지", value=f"{badgeInfo}", inline=False)
 	embed.set_footer(text="봇 개발자: 이하님#9999", icon_url=owner_avator)
 	embed.set_thumbnail(url=user.profile_image_url)
-	button = manage_components.create_button(
-		style=ButtonStyle.URL,
-		label=" 트위치 채널 바로가기",
-		#emoji="tv",
-		url=f"https://www.twitch.tv/{id}"
-	)
-	action_row = manage_components.create_actionrow(button)
+	if id == "dlgksla":
+		action_row = manage_components.create_actionrow(*button)
+	else:
+		action_row = manage_components.create_actionrow(button)
 	if streamerType != "트수":
 		await ctx.send(
 			embed=embed,
@@ -154,15 +197,45 @@ async def twitch(ctx, id: str):
 			)
 		]
 	)
+@bot.command(aliases=["달력","ekffur","캘린더","zofflsej","ㄷ","e","ㅋ","z"])
 async def calendar(ctx, year: int = time.localtime(time.time()).tm_year, month: int = time.localtime(time.time()).tm_mon):
     embed = discord.Embed(color=0xfffff, title=f"{year}년 {month}월 달력", description=f"{calendar.prmonth(year, month)}```")
     embed.set_footer(text="봇 개발자: 이하님#9999", icon_url=owner_avator)
     await ctx.send(embed=embed)
 
+@bot.command()
+async def 답장(ctx):
+	button = [
+		manage_components.create_button(
+			style=ButtonStyle.green,
+			label="그린버튼",
+			custom_id="greenbutton"
+		),
+		manage_components.create_button(
+			style=ButtonStyle.blue,
+			label="블루버튼",
+			custom_id="bluebutton"
+		)
+	]
+	action_row = manage_components.create_actionrow(*button)
+	await ctx.reply("test", mention_author=False, components=[action_row])
+
 @bot.event
 async def on_slash_command_error(ctx, ex):
 	if f"{ex}" == "'NoneType' object has no attribute 'id'":
-		embed = discord.Embed(color=0xff5555, title=f"오류!", description="존재하지 않는 ID에요.")
+		embed = discord.Embed(color=0xff5555, title=f"오류!", description="존재하지 않는 ID예요.")
+	elif "400 Client Error: Bad Request for url: https://api.twitch.tv/" in f"{ex}":
+		embed = discord.Embed(color=0xff5555, title=f"오류!", description="ID가 아닌데요?")
+	else:
+		embed = discord.Embed(color=0xff5555, title=f"오류!", description="오류가 발생했어요.")
+		embed.add_field(name="출력", value=f"{ex}", inline=False)
+	embed.set_footer(text="봇 개발자: 이하님#9999", icon_url=owner_avator)
+	await ctx.send(embed=embed)
+
+@bot.event
+async def on_command_error(ctx, ex):
+	if "'NoneType' object has no attribute 'id'" in f"{ex}":
+		embed = discord.Embed(color=0xff5555, title=f"오류!", description="존재하지 않는 ID예요.")
 	elif "400 Client Error: Bad Request for url: https://api.twitch.tv/" in f"{ex}":
 		embed = discord.Embed(color=0xff5555, title=f"오류!", description="ID가 아닌데요?")
 	else:
