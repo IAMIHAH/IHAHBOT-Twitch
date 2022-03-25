@@ -1,6 +1,3 @@
-# 뭐였더라
-from zlib import decompress
-
 # dpy
 import discord
 from discord import player
@@ -26,14 +23,14 @@ from discord_slash.model import ButtonStyle
 import time
 import calendar
 
-twclid = "0lfpvagxu5lpn2mscy5qf8mh05p9jp"
-twclsc = "8s3ztphf7fqeinwdsj6o1vlkh5gzle"
+twclid = "Twitch Application ID"
+twclsc = "Twitch Application Secret"
 helix = twitch.Helix(twclid, twclsc)
 
-token = "NzY5MTYzOTU1MTM3Njc1Mjc1.X5LBwQ.7KX_iIByxfwdFcyLH7_u_ptbpII"
+token = "Your Token"
 bot = commands.Bot(command_prefix=["이하야 ","ㅇ","d"])
 slash = SlashCommand(bot, sync_commands=True)
-owner_avator = "https://cdn.discordapp.com/avatars/741973166364164099/e2194f9f6d88a00123005bcfe4110acd.png"
+owner_avator = "avatar"
 
 @bot.event
 async def on_ready():
@@ -47,11 +44,6 @@ async def help(ctx):
 	embed = discord.Embed(color=0xffffff, title="이하봇 빗금 명령어 도움말")
 	embed.add_field(name="/twitch [ID]", value="\'이하야 트위치 [ID]\' 또는 \'ㅇㅌ [ID]\' 또는 \'dx [ID]\'로도 가능\n[ID] = 트위치 유저 ID\n[ID]란에 작성한 유저에 대한 정보를 불러옵니다.", inline=False)
 	embed.add_field(name="/invite", value="이하봇 초대 링크를 가져옵니다.", inline=False)
-	await ctx.send(embed=embed)
-
-@slash.slash(name="invite", description="이하봇 초대 링크를 가져옵니다.")
-async def invite(ctx):
-	embed = discord.Embed(color=0xffffff, title=f"초대하기", description="[바로가기](https://discord.com/oauth2/authorize?client_id=769163955137675275&permissions=8&scope=bot%20applications.commands)")
 	await ctx.send(embed=embed)
 
 @slash.slash(name="ping", description="이하봇 지연시간을 가져옵니다.")
@@ -93,25 +85,6 @@ async def twitch(ctx, id: str):
 	)
 
 	# 스트리머 등급에 따른 표시 변경 및 이모지
-	if id == "dlgksla":
-		badge = f"{badge}<:IhahNew:860043368553381918> "
-		badgeInfo = f"{badgeInfo}<:IhahNew:860043368553381918> 봇 개발자\n"
-		# 나 전용임 히히
-		button = [
-			manage_components.create_button(
-				style=ButtonStyle.URL,
-				label="트위치 채널 바로가기",
-				#emoji="tv",
-				url=f"https://www.twitch.tv/{id}"
-			),
-			manage_components.create_button(
-				style=ButtonStyle.URL,
-				label="유튜브 채널 바로가기",
-				#emoji="tv",
-				url=f"https://www.youtube.com/channel/UCN_69Qvv0eHHKGGL7sdYsvg?sub_confirmation=1"
-			)
-		]
-
 	if f"{user.type}" == "admin":
 		streamerType = "트위치 어드민 <:admin:883691115398717450> / "
 		badge = f"{badge}<:admin:883691115398717450> "
@@ -166,12 +139,9 @@ async def twitch(ctx, id: str):
 	else:
 		embed.add_field(name="사용자 소개", value=f"그들에 관해 아는 게 많지 않지만, {user.display_name}님이 대단하다는 건 확실해요.", inline=False)
 	embed.add_field(name="보유한 뱃지", value=f"{badgeInfo}", inline=False)
-	embed.set_footer(text="봇 개발자: 이하님#9999", icon_url=owner_avator)
+	embed.set_footer(text="봇 개발자: 이하님#3559")
 	embed.set_thumbnail(url=user.profile_image_url)
-	if id == "dlgksla":
-		action_row = manage_components.create_actionrow(*button)
-	else:
-		action_row = manage_components.create_actionrow(button)
+	action_row = manage_components.create_actionrow(button)
 	if streamerType != "트수":
 		await ctx.send(
 			embed=embed,
@@ -179,46 +149,6 @@ async def twitch(ctx, id: str):
 		)
 	else:
 		await ctx.send(embed=embed)
-
-@slash.slash(name="calendar",
-		description="달력 출력하기",
-		options=[
-			create_option(
-				name="year",
-				description="연도를 숫자 4자리로 입력해주세요. (ex: 2021)",
-				option_type=3,
-				required=False
-			),
-                        create_option(
-				name="month",
-				description="월을 숫자로 입력해주세요. (1~12)",
-				option_type=3,
-				required=False
-			)
-		]
-	)
-@bot.command(aliases=["달력","ekffur","캘린더","zofflsej","ㄷ","e","ㅋ","z"])
-async def calendar(ctx, year: int = time.localtime(time.time()).tm_year, month: int = time.localtime(time.time()).tm_mon):
-    embed = discord.Embed(color=0xfffff, title=f"{year}년 {month}월 달력", description=f"{calendar.prmonth(year, month)}```")
-    embed.set_footer(text="봇 개발자: 이하님#9999", icon_url=owner_avator)
-    await ctx.send(embed=embed)
-
-@bot.command()
-async def 답장(ctx):
-	button = [
-		manage_components.create_button(
-			style=ButtonStyle.green,
-			label="그린버튼",
-			custom_id="greenbutton"
-		),
-		manage_components.create_button(
-			style=ButtonStyle.blue,
-			label="블루버튼",
-			custom_id="bluebutton"
-		)
-	]
-	action_row = manage_components.create_actionrow(*button)
-	await ctx.reply("test", mention_author=False, components=[action_row])
 
 @bot.event
 async def on_slash_command_error(ctx, ex):
@@ -229,7 +159,7 @@ async def on_slash_command_error(ctx, ex):
 	else:
 		embed = discord.Embed(color=0xff5555, title=f"오류!", description="오류가 발생했어요.")
 		embed.add_field(name="출력", value=f"{ex}", inline=False)
-	embed.set_footer(text="봇 개발자: 이하님#9999", icon_url=owner_avator)
+	embed.set_footer(text="봇 개발자: 이하님#3559")
 	await ctx.send(embed=embed)
 
 @bot.event
@@ -241,7 +171,7 @@ async def on_command_error(ctx, ex):
 	else:
 		embed = discord.Embed(color=0xff5555, title=f"오류!", description="오류가 발생했어요.")
 		embed.add_field(name="출력", value=f"{ex}", inline=False)
-	embed.set_footer(text="봇 개발자: 이하님#9999", icon_url=owner_avator)
+	embed.set_footer(text="봇 개발자: 이하님#3559")
 	await ctx.send(embed=embed)
 
 bot.run(token)
